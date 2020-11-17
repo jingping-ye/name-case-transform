@@ -1,0 +1,27 @@
+{
+  "name": "name-case-transform",
+  "version": "1.0.0",
+  "description": "命名格式转换工具",
+  "main": "./source/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jingping-ye/name-case-transform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jingping-ye/name-case-transform/issues"
+  },
+  "homepage": "https://github.com/jingping-ye/name-case-transform#readme",
+  "devDependencies": {
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.0.4",
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1"
+  }
+}
