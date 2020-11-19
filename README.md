@@ -1,10 +1,12 @@
-# name-case-transform
+# 风格转换工具
 
 > name case transform tool
 
-- support transform between Pascal, small camel, hyphen, underline case.
+文档：中文 | [English](./README-en.md)
 
-- support string and JSON type.
+- 支持 Pascal、小驼峰、连字符、下划线命名风格互转。
+
+- 支持字符串和 JSON(key)。
 
 ## API
 
@@ -12,36 +14,36 @@
 caseTransform((dataSource: [String | Object]), (targetCase: String), [(sourceCase: String)]);
 ```
 
-- dataSource: the value you want to transform.
-- targetCase: the case you want to transform.
+- dataSource: 想要转换的数据。
+- targetCase: 目标命名风格。
 
-  - `-`: hyphen case, eg:`my-name`.
-  - `_`: underscore case, eg: `my_name`.
-  - `A`: Pascal case, eg: `MyName`.
-  - `a`: little camel, eg: `myName`.
+  - `-`: 连字符命名风格，比如：`my-name`.
+  - `_`: 下划线命名风格, 比如: `my_name`.
+  - `A`: Pascal 命名风格, eg: `MyName`.
+  - `a`: 小驼峰命名风格, eg: `myName`.
 
-- sourceCase: the case your dataSource is.Not necessary(the program will auto infer the source case. But you can specified this when the auto infer is not work well as expected .).
-  - `-`: hyphen case, eg:`my-name`.
-  - `_`: underscore case, eg: `my_name`.
-  - `A`: Pascal case, eg: `MyName`.
-  - `a`: little camel, eg: `myName`.
+- 数据源命名风格: 非必须。（程序会自动推断源数据风格，但是判断可能不及预期。这个时候，可以指定数据源命名风格。）
+  - `-`: 连字符命名风格，比如：`my-name`.
+  - `_`: 下划线命名风格, 比如: `my_name`.
+  - `A`: Pascal 命名风格, eg: `MyName`.
+  - `a`: 小驼峰命名风格, eg: `myName`.
 
-## Usage
+## 用法
 
-### import
+### 引入
 
 ```js
 import caseTransform from "name-case-transform";
 ```
 
-### transform
+### 转换
 
-String:
+字符串:
 
 ```js
 let res = caseTransform("my_name", "A"); // MyName;
 
-// specified the source case
+// 指定源数据命名风格
 let res = caseTransform("my_name", "A", "_"); // MyName;
 ```
 
@@ -64,12 +66,12 @@ let data = {
 
 let res = caseTransform(data, "a");
 
-// specify the source case
+// 指定源数据命名风格
 let res = caseTransform(data, "a", "_");
 
 ```
 
-Result:
+结果:
 
 ```js
 {
