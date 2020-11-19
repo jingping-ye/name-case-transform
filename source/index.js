@@ -51,28 +51,19 @@ class CaseTransform {
     const loopObj = function (obj) {
       if (Array.isArray(obj)) {
         obj.forEach((item) => loopObj(item));
-      } else if (typeof obj === "object") {
+      } else if (Object.prototype.toString.call(obj) === "[object Object]") {
         Object.keys(obj).forEach((key) => {
           let newKey = _this.transformController(key, _this.targetCase, _this.sourceCase);
           if (newKey !== key) {
             obj[newKey] = obj[key];
             delete obj[key];
-            if (typeof obj[newKey] === "object") {
-              loopObj(obj[newKey]);
-            }
-          } else {
-            if (typeof obj[key] === "object") {
-              loopObj(obj[key]);
-            }
           }
+          loopObj(obj[newKey]);
         });
       }
     };
 
     loopObj(curVal);
-
-    // console.log("curVal===", JSON.stringify(curVal));
-
     return curVal;
   }
 
