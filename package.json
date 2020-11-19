@@ -1,7 +1,7 @@
 {
   "name": "name-case-transform",
   "version": "1.0.0",
-  "description": "命名格式转换工具",
+  "description": "name case transform tool",
   "main": "./source/index.js",
   "type": "module",
   "scripts": {

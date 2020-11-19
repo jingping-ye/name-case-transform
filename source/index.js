@@ -1,196 +1,283 @@
-class caseTransform {
-  constructor(val, sourceNameCase, transformNameCase) {
-    this.legalNameCase = {
-      _: "toUnderscore",
-      A: "toPascal",
-      "-": "toHyphen",
-      a: "toCamel",
-    };
-    if (this.checkVal() && this.checkNameCase()) {
+class CaseTransform {
+  constructor(val, targetCase = "", sourceCase = "") {
+    this.val = "";
+    this.valType = "";
+    this.targetCase = "";
+    this.sourceCase = "";
+    this.supportedCase = ["-", "_", "A", "a"];
+    this.transformVal = "";
+
+    if (this.checkVal(val)) {
       this.val = val;
-      this.sourceNameCase = sourceNameCase;
-      this.transformNameCase = transformNameCase;
-      this.chooseNameCase = this.legalNameCase[nameCase];
-      if (typeof this.val === "String") {
-        this[this.checkNameCase](this.val);
-      } else {
-        this.jsonTransform(this.val);
-      }
-    }
-  }
-
-  /**
-   * auto check the type of case.
-   */
-  autoCheckCaseType(){
-    if(this.val.includes("_")){
-      this.curCaseName = "_";
-    }else if(this.val.includes("-")){
-      this.curCaseName = "-";
-    }else if(/^[A-Z]/.test(this.val)){
-      this.curCaseName = "A";
-    }else{
-      this.curCaseName = "a";
-    }
-  };
-
-  checkVal() {
-    const isString = function () {
-      return typeof this.val === "string";
-    };
-
-    const isJSON = function () {
-      try{
-        let obj = JSON.parse(JSON.stringify(this.val));
-        if(obj && typeof obj === "object"){
-          return true;
+      if (this.checkCase(targetCase)) {
+        this.targetCase = targetCase;
+        if (this.sourceCase !== this.targetCase) {
+          if (sourceCase.length > 0) {
+            if (this.checkCase(sourceCase)) {
+              if (this.sourceCase !== this.targetCase) {
+                this.sourceCase = sourceCase;
+                this.transformVal = this.transform();
+              } else {
+                console.error("Error: The source case cannot be the same as the target case!");
+              }
+            }
+          } else {
+            this.autoInferSourceCase();
+            if (this.sourceCase !== this.targetCase) {
+              this.transformVal = this.transform();
+            } else {
+              console.error("Error: The source case cannot be the same as the target case!");
+            }
+          }
+        } else {
+          console.error("Error: target case cannot be the same as source case!");
         }
-      }catch(e){
-        console.log("err",e);
       }
-      return false;
+    }
+  }
+
+  transform() {
+    if (this.valType === "String") {
+      return this.transformController(this.val, this.targetCase, this.sourceCase);
+    } else if (this.valType === "JSON") {
+      return this.transformJSON();
+    }
+  }
+
+  transformJSON() {
+    let curVal = this.deepCopy(this.val);
+    const _this = this;
+
+    const loopObj = function (obj) {
+      if (Array.isArray(obj)) {
+        obj.forEach((item) => loopObj(item));
+      } else if (typeof obj === "object") {
+        Object.keys(obj).forEach((key) => {
+          let newKey = _this.transformController(key, _this.targetCase, _this.sourceCase);
+          if (newKey !== key) {
+            obj[newKey] = obj[key];
+            delete obj[key];
+            if (typeof obj[newKey] === "object") {
+              loopObj(obj[newKey]);
+            }
+          } else {
+            if (typeof obj[key] === "object") {
+              loopObj(obj[key]);
+            }
+          }
+        });
+      }
     };
 
-    if (isString() && isJSON()) {
-      return true;
-    } else {
-      throw Error("Error Data Source: Only support String And JSON!");
-    }
+    loopObj(curVal);
+
+    // console.log("curVal===", JSON.stringify(curVal));
+
+    return curVal;
   }
 
-  checkNameCase() {
-    if (this.legalNameCase[this.nameCase]) {
-      return true;
-    } else {
-      throw Error(
-        "Illegal Case Name: Only Support UnderScore(_),Pascal(a),Hyphen(-),Camel(a), Please pass the correct params option!"
-      );
+  deepCopy(obj) {
+    let cloneObj = Array.isArray(obj) ? [] : {};
+    if (obj && typeof obj === "object") {
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (obj[key] && typeof obj[key] === "object") {
+            cloneObj[key] = this.deepCopy(obj[key]);
+          } else {
+            cloneObj[key] = obj[key];
+          }
+        }
+      }
     }
+    return cloneObj;
   }
 
-  converter(){
-    const converterList = {
-      underscore:{
-        toCamel:{
-          regex:/_(\w)/g,
-          replacer:function(matched,group){
+  transformController(val, targetCase, sourceCase) {
+    const transformCenter = {
+      _: {
+        a: {
+          regex: /_(\w)/g,
+          replacer: function (matched, group) {
             return group.toUpperCase();
-          }
+          },
         },
-        toPascal:{
-          regex:/(^(\w))|_(\w)/g,
-          replacer:function(matched){
+        A: {
+          regex: /(^(\w))|_(\w)/g,
+          replacer: function (matched) {
             return matched.replace("_", "").toUpperCase();
-          }
+          },
         },
-        toHyphen:{
-          regex:/_/g,
-          replacer:function(){
+        "-": {
+          regex: /_/g,
+          replacer: function () {
             return "-";
-          }
-        }
+          },
+        },
       },
-      pascal:{
-        toUnderscore:{
-          regex:/[A-Z]/g,
-          replacer:function(matched, index){
-          if (index === 0) {
+      A: {
+        _: {
+          regex: /[A-Z]/g,
+          replacer: function (matched, index) {
+            if (index === 0) {
               return matched.toLowerCase();
             } else {
               return `_${matched.toLowerCase()}`;
             }
-          }
+          },
         },
-        toHyphen:{
-          regex:/[A-Z]/,
-          replacer:function(matched,index){
+        "-": {
+          regex: /[A-Z]/g,
+          replacer: function (matched, index) {
             if (index === 0) {
               return matched.toLowerCase();
             } else {
               return `-${matched.toLowerCase()}`;
             }
-          }
+          },
         },
-        toCamel:{
-          regex:/[A-Z]/g,
-          replacer:function(matched, index){
+        a: {
+          regex: /[A-Z]/g,
+          replacer: function (matched, index) {
             if (index === 0) {
               return matched.toLowerCase();
             } else {
               return matched;
             }
-          }
-        }
+          },
+        },
       },
-      hyphen:{
-        toUnderscore:{
+      "-": {
+        _: {
           regex: /-/g,
-          replacer:function(){
-             return "_";
-          }
+          replacer: function () {
+            return "_";
+          },
         },
-        toPascal:{
-          regex:/(^\w)|-(\w)/g,
-          replacer:function(matched){
+        A: {
+          regex: /(^\w)|-(\w)/g,
+          replacer: function (matched) {
             return matched.replace("-", "").toUpperCase();
-          }
+          },
         },
-        toCamel:{
-          regex:/-(\w)/g,
-          replacer:function(matched){
+        a: {
+          regex: /-(\w)/g,
+          replacer: function (matched) {
             return matched.replace("-", "").toUpperCase();
-          }
-        }
+          },
+        },
       },
-      camel:{
-        toUnderscore:{
-          regex:/[A-Z]/g,
-          replacer:function(matched){
-             return `_${matched.toLowerCase()}`;
-          }
+      a: {
+        _: {
+          regex: /[A-Z]/g,
+          replacer: function (matched) {
+            return `_${matched.toLowerCase()}`;
+          },
         },
-        toPascal:{
-          regex:/^(\w)/g,
-          replacer:function(matched){
+        A: {
+          regex: /^(\w)/g,
+          replacer: function (matched) {
             return matched.toUpperCase();
-          }
+          },
         },
-        toHyphen:{
-          regex:/[A-Z]/g,
-          replacer:function(matched){
+        "-": {
+          regex: /[A-Z]/g,
+          replacer: function (matched) {
             return `-${matched.toLowerCase()}`;
-          }
+          },
         },
+      },
+    };
+
+    let transformProcess = transformCenter[sourceCase][targetCase];
+    return val.replace(transformProcess.regex, transformProcess.replacer);
+  }
+
+  autoInferSourceCase() {
+    let sourceCase = "";
+    if (this.valType === "String") {
+      sourceCase = this.autoInferString();
+    } else if (this.valType === "JSON") {
+      sourceCase = this.autoInferJSON();
+    }
+    this.sourceCase = sourceCase;
+  }
+
+  autoInferString() {
+    if (this.val.includes("_")) {
+      return "_";
+    } else if (this.val.includes("-")) {
+      return "-";
+    } else if (/^[A-Z]/.test(this.val)) {
+      return "A";
+    } else {
+      return "a";
+    }
+  }
+
+  autoInferJSON() {
+    let valStr = JSON.stringify(this.val);
+    let matchKeyRegex = /(?<=")([a-zA-Z0-9_-]+)(?=":)/g;
+    let keyList = valStr.match(matchKeyRegex);
+    if (keyList && keyList.length > 0) {
+      if (keyList.some((item) => item.includes("_"))) {
+        return "_";
+      } else if (keyList.some((item) => item.includes("-"))) {
+        return "-";
+      } else if (keyList.some((item) => /^[A-Z]/.test(item))) {
+        return "A";
+      } else {
+        return "a";
       }
     }
   }
 
-  //  转为下划线命名法
-  //  my_name => myName
-  //  my_name => MyName
-  //  my_name => my-name
-  toUnderScore(val) {
-    //  下划线转小驼峰
-    const underScore2Camel = function (val) {
-      return val.replace(/_(\w)/g, function (all, letter) {
-        return letter.toUpperCase();
-      });
-    };
-
-    const under
+  checkVal(val) {
+    if (this.isString(val)) {
+      this.valType = "String";
+      return true;
+    } else if (this.isJSON(val)) {
+      this.valType = "JSON";
+      return true;
+    } else {
+      console.error("Error: For data source, Only support String and JSON!");
+      return false;
+    }
   }
 
-  //  转为Pascal命名法
-  toPascal(val) {}
+  checkCase(caseFlag) {
+    if (caseFlag.length == 0) {
+      console.error("Error: Please pass the case!");
+      return false;
+    } else {
+      if (this.supportedCase.includes(caseFlag)) {
+        return true;
+      } else {
+        console.error("Error: Please input the correct case! ");
+        return false;
+      }
+    }
+  }
 
-  //  转为连字符命名法
-  toHyphen(val) {}
+  isString(val) {
+    return typeof val === "string";
+  }
 
-  //  转为小驼峰命名法
-  toCamel(val) {}
-
-  //  json转为其他格式
-  jsonTransform(val) {}
+  isJSON(val) {
+    try {
+      let obj = JSON.parse(JSON.stringify(val));
+      if (obj && typeof obj === "object") {
+        return true;
+      }
+    } catch (e) {
+      console.log("e", e);
+    }
+    return false;
+  }
 }
 
+const caseTransform = function (val = "", targetFlag = "", sourceFlag = "") {
+  return new CaseTransform(val, targetFlag, sourceFlag).transformVal;
+};
+
 export default caseTransform;
+export { caseTransform };
