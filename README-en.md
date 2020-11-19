@@ -51,24 +51,23 @@ JSON:
 
 ```js
 let data = {
-  res_code:4000,
-  res_list:[
+  res_code: 4000,
+  res_list: [
     {
-      my_name:"admin1",
-      password:"12323"
+      my_name: "admin1",
+      password: "12323",
     },
     {
-      my_name:"admin2",
-      password:"123123
-    }
-  ]
+      my_name: "admin2",
+      password: "123123",
+    },
+  ],
 };
 
 let res = caseTransform(data, "a");
 
 // specify the source case
 let res = caseTransform(data, "a", "_");
-
 ```
 
 Result:
@@ -83,7 +82,7 @@ Result:
     },
     {
       myName:"admin2",
-      password:"123123
+      password:"123123"
     }
   ]
 }
