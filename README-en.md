@@ -87,3 +87,15 @@ Result:
   ]
 }
 ```
+
+## Q-A
+
+How the program does when many name cases mixed ?(Priority is given in the following order)
+
+- A string, or JSON (key) value, that contains `_`, inferred as an underscore style(`_`).
+
+- A string, or JSON (key) value, that contains `-`, inferred as an hyphen style(`-`).
+
+- A string, or JSON (key) value, the first letter is capital, inferred as Pascal style.
+
+- In other cases, it is inferred as a small hump style.
