@@ -1,6 +1,6 @@
 {
   "name": "name-case-transform",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "name case transform tool",
   "main": "./source/index.js",
   "type": "module",
