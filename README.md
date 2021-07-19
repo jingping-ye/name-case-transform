@@ -96,3 +96,19 @@ let res = caseTransform(data, "a", "_");
 - 字符串或者 JSON(key)值，包含`-`, 推断为连字符风格("-")。
 - 字符串或者 JSON(key)值，第一个字母为大写，推断为 Pascal 风格。
 - 其他情况，推断为小驼峰风格。
+
+## 其他
+
+### 兼容性问题
+
+因为程序中多是使用正则，所以在不支持正则的环境将会报错！！！
+
+IE中兼容性配置
+- IE中必须升级到`1.0.6`,使用`npm update name-case-transform`升级包
+- 在`vue.config.js`中配置如下：
+```js
+const vueConfig = {
+  // 其他的配置
+  transpileDependencies:["name-case-transform"],
+}
+```
