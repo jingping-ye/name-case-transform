@@ -205,10 +205,32 @@ class CaseTransform {
     }
   }
 
+  getKeyList() {
+    let keyList = [];
+    let curVal = this.deepCopy(this.val);
+
+    const loopObj = function (obj) {
+      if (Array.isArray(obj)) {
+        obj.forEach((item) => loopObj(item));
+      } else if (Object.prototype.toString.call(obj) === "[object Object]") {
+        Object.keys(obj).forEach((key) => {
+          keyList.push(key);
+          loopObj(obj[key]);
+        });
+      }
+    };
+
+    loopObj(curVal);
+    return keyList;
+  }
+
   autoInferJSON() {
-    let valStr = JSON.stringify(this.val);
-    let matchKeyRegex = /(?<=")([a-zA-Z0-9_-]+)(?=":)/g;
-    let keyList = valStr.match(matchKeyRegex);
+    // 兼容IE，去掉该部分
+    // let valStr = JSON.stringify(this.val);
+    // let matchKeyRegex = /(?<=")([a-zA-Z0-9_-]+)(?=":)/g;
+    // let keyList = valStr.match(matchKeyRegex);
+
+    let keyList = this.getKeyList();
     if (keyList && keyList.length > 0) {
       if (keyList.some((item) => item.includes("_"))) {
         return "_";
